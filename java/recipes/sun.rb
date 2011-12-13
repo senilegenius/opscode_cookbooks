@@ -23,9 +23,6 @@ pkgs = value_for_platform(
   },
   ["debian","ubuntu"] => {
     "default" => ["sun-java6-jdk"]
-  },
-  "arch" => {
-    "default" => ["jre"]
   }
 )
 
@@ -70,8 +67,6 @@ when "centos", "redhat", "fedora"
     end
   end
 
-when "arch"
-
 else
   Chef::Log.error("Installation of Sun Java packages not supported on this platform.")
 end
@@ -89,7 +84,7 @@ pkgs.each do |pkg|
     when "ubuntu", "debian"
       response_file "java.seed"
     when "centos", "redhat", "fedora"
-      source "#{Chef::Config[:file_cache_path]}/#{pkg}" 
+      source "#{Chef::Config[:file_cache_path]}/#{pkg}"
       options "--nogpgcheck" # sun/oracle doesn't sign their RPMs o_O
     end
     action :install
