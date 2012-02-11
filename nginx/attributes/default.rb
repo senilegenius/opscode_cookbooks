@@ -55,7 +55,7 @@ default[:nginx][:gzip_types] = [
 
 default[:nginx][:keepalive]          = "on"
 default[:nginx][:keepalive_timeout]  = 65
-default[:nginx][:worker_processes]   = cpu[:total]
+default[:nginx][:worker_processes]   = cpu ? cpu[:total] : 1
 default[:nginx][:worker_connections] = 2048
 default[:nginx][:server_names_hash_bucket_size] = 64
 
