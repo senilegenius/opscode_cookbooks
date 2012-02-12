@@ -22,9 +22,10 @@
 #
 
 root_group = value_for_platform(
-  "openbsd" => { "default" => "wheel" },
-  "freebsd" => { "default" => "wheel" },
-  "default" => "root"
+  "openbsd"  => { "default" => "wheel" },
+  "freebsd"  => { "default" => "wheel" },
+  "mac_os_x" => { "default" => "wheel" },
+  "default"  => "root"
 )
 
 user "chef" do
@@ -253,6 +254,24 @@ when "daemontools"
       action [:enable, :start]
     end
   end
+
+when "procfile"
+
+  gem_package "foreman"
+
+  procfiles = [ "/etc/chef/Procfile-chef-backend", "/etc/chef/Procfile-chef-server" ]
+  procfiles.each do |procfile_path|
+    template procfile_path do
+      source      "#{File.basename(procfile_path)}.erb"
+      mode        "0644"
+      variables   :chef_server => node[:chef_server]
+    end
+  end
+
+  msg = "\nLaunch chef server with\n\n"
+  msg << procfiles.map{|pf| "sudo -u chef foreman start -f #{pf}" }.join(" & sleep 2\n")
+  msg << "\n"
+  log(msg)
 
 when "bsd"
 
