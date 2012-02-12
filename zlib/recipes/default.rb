@@ -7,9 +7,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,15 @@
 # limitations under the License.
 #
 
-package "zlib-devel" do
-  package_name value_for_platform(
-    [ "centos", "redhat", "scientific", "suse", "fedora" ] => { "default" => "zlib-devel" },
-    "default" => 'zlib1g-dev'
-  )
+if node[:platform] == "mac_os_x"
+  Chef::Log.info("Skipping zlib install -- it's built in to OSX")
+
+else
+  package "zlib-devel" do
+    package_name value_for_platform(
+      [ "centos", "redhat", "scientific", "suse", "fedora" ] => { "default" => "zlib-devel" },
+      "default" => 'zlib1g-dev'
+      )
+  end
+
 end
