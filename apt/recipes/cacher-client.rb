@@ -37,8 +37,17 @@ else
 end
 
 if servers.length > 0
+  if servers[0][:apt_cacher]
+    ipaddress = servers[0][:apt_cacher][:addr]
+    port      = servers[0][:apt_cacher][:port]
+  else
+    ipaddress = servers[0][:ipaddress]
+    port      = node[:apt_cacher][:port]
+  end
+
   Chef::Log.info("apt-cacher-ng server found on #{servers[0]}.")
-  proxy = "Acquire::http::Proxy \"http://#{servers[0].ipaddress}:3142\";\n"
+  proxy = "Acquire::http::Proxy \"http://#{ipaddress}:#{port}\";\n"
+
   file "/etc/apt/apt.conf.d/01proxy" do
     owner "root"
     group "root"

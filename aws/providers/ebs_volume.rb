@@ -30,7 +30,7 @@ action :create do
       node.set[:aws][:ebs_volume][new_resource.name][:volume_id] = nvid
       new_resource.updated_by_last_action(true)
     end
-    node.save unless Chef::Config[:solo]
+    save_node()
   end
 end
 
@@ -47,7 +47,7 @@ action :attach do
     # attach the volume and register its id in the node data
     attach_volume(vol[:aws_id], instance_id, new_resource.device, new_resource.timeout)
     node.set[:aws][:ebs_volume][new_resource.name][:volume_id] = vol[:aws_id]
-    node.save unless Chef::Config[:solo]
+    save_node()
     new_resource.updated_by_last_action(true)
   end
 end
@@ -74,9 +74,9 @@ action :prune do
     if snapshot[:aws_volume_id] == vol[:aws_id]
       Chef::Log.info "Found old snapshot #{snapshot[:aws_id]} (#{snapshot[:aws_volume_id]}) #{snapshot[:aws_started_at]}"
       old_snapshots << snapshot
-    end 
+    end
   end
-  if old_snapshots.length > new_resource.snapshots_to_keep 
+  if old_snapshots.length > new_resource.snapshots_to_keep
     old_snapshots[new_resource.snapshots_to_keep, old_snapshots.length].each do |die|
       Chef::Log.info "Deleting old snapshot #{die[:aws_id]}"
       ec2.delete_snapshot(die[:aws_id])
@@ -219,5 +219,20 @@ def detach_volume(volume_id, timeout)
     end
   rescue Timeout::Error
     raise "Timed out waiting for volume detachment after #{timeout} seconds"
+  end
+end
+
+def save_node()
+  current_version = Chef::VERSION
+  node_save_safe_version = '0.8'
+
+  if current_version >= node_save_safe_version
+    if !Chef::Config.solo
+      node.save
+    else
+      Chef::Log.warn("Skipping node save since we are running under chef-solo.  Node attributes will not be persisted.")
+    end
+  else
+    Chef::Log.warn("Skipping node save because saving a node in a recipe prior to version #{node_save_safe_version.to_s} isn't valid");
   end
 end

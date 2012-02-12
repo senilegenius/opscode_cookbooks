@@ -17,8 +17,11 @@
 # limitations under the License.
 #
 
+default[:ubuntu][:apt_sources] = [] # %w[ partner opscode multiverse ]
+
 case platform
 when "ubuntu"
+  # http://us-east-1.ec2.archive.ubuntu.com/ubuntu
   set[:ubuntu][:archive_url]  = "http://us.archive.ubuntu.com/ubuntu"
   set[:ubuntu][:security_url] = "http://security.ubuntu.com/ubuntu"
 end

@@ -26,5 +26,8 @@ service "apt-cacher-ng" do
   action [ :enable, :start ]
 end
 
+node[:apt_cacher] ||= Mash.new
+node[:apt_cacher][:addr] = node[:cloud] ? node[:cloud][:local_ipv4] : node[:ipaddress]
+
 #this will help seed the proxy
 include_recipe "apt::cacher-client"

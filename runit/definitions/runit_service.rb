@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-define :runit_service, :directory => nil, :only_if => false, :finish_script => false, :control => [], :run_restart => true, :active_directory => nil, :owner => "root", :group => "root", :template_name => nil, :start_command => "start", :stop_command => "stop", :restart_command => "restart", :status_command => "status", :options => Hash.new, :env => Hash.new do
+define :runit_service, :directory => nil, :only_if => false, :finish_script => false, :control => [], :run_restart => true, :active_directory => nil, :owner => "root", :group => "root", :template_name => nil, :start_command => "start", :stop_command => "stop", :restart_command => "restart", :status_command => "status", :options => Hash.new, :env => Hash.new, :run_state => :nothing do
   include_recipe "runit"
 
   params[:directory] ||= node[:runit][:sv_dir]
@@ -31,28 +31,28 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
   directory sv_dir_name do
     owner params[:owner]
     group params[:group]
-    mode 0755
+    mode '0755'
     action :create
   end
 
   directory "#{sv_dir_name}/log" do
     owner params[:owner]
     group params[:group]
-    mode 0755
+    mode '0755'
     action :create
   end
 
   directory "#{sv_dir_name}/log/main" do
     owner params[:owner]
     group params[:group]
-    mode 0755
+    mode '0755'
     action :create
   end
 
   template "#{sv_dir_name}/run" do
     owner params[:owner]
     group params[:group]
-    mode 0755
+    mode '0755'
     source "sv-#{params[:template_name]}-run.erb"
     cookbook params[:cookbook] if params[:cookbook]
     if params[:options].respond_to?(:has_key?)
@@ -63,7 +63,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
   template "#{sv_dir_name}/log/run" do
     owner params[:owner]
     group params[:group]
-    mode 0755
+    mode '0755'
     source "sv-#{params[:template_name]}-log-run.erb"
     cookbook params[:cookbook] if params[:cookbook]
     if params[:options].respond_to?(:has_key?)
@@ -73,7 +73,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
 
   unless params[:env].empty?
     directory "#{sv_dir_name}/env" do
-      mode 0755
+      mode '0755'
       action :create
     end
 
@@ -88,7 +88,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
     template "#{sv_dir_name}/finish" do
       owner params[:owner]
       group params[:group]
-      mode 0755
+      mode '0755'
       source "sv-#{params[:template_name]}-finish.erb"
       cookbook params[:cookbook] if params[:cookbook]
       if params[:options].respond_to?(:has_key?)
@@ -101,7 +101,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
     directory "#{sv_dir_name}/control" do
       owner params[:owner]
       group params[:group]
-      mode 0755
+      mode '0755'
       action :create
     end
 
@@ -109,7 +109,7 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
       template "#{sv_dir_name}/control/#{signal}" do
         owner params[:owner]
         group params[:group]
-        mode 0755
+        mode '0755'
         source "sv-#{params[:template_name]}-control-#{signal}.erb"
         cookbook params[:cookbook] if params[:cookbook]
         if params[:options].respond_to?(:has_key?)
@@ -141,19 +141,30 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
 
   service params[:name] do
     control_cmd = node[:runit][:sv_bin]
+    status_cmd  = "service"
     if params[:owner]
       control_cmd = "#{node[:runit][:chpst_bin]} -u #{params[:owner]} #{control_cmd}"
+      status_cmd  = "#{node[:runit][:chpst_bin]} -u #{params[:owner]} #{status_cmd}"
     end
     provider Chef::Provider::Service::Init
     supports :restart => true, :status => true
     start_command "#{control_cmd} #{params[:start_command]} #{service_dir_name}"
     stop_command "#{control_cmd} #{params[:stop_command]} #{service_dir_name}"
     restart_command "#{control_cmd} #{params[:restart_command]} #{service_dir_name}"
-    status_command "#{control_cmd} #{params[:status_command]} #{service_dir_name}"
-    if params[:run_restart]
+    #
+    # exit code of sv(8) is 0 when invoked directly and the *command* was successful.
+    # we must invoke it as 'service' (or somehow with "a base name other than sv")
+    # to get the desired exit code behavior
+    #
+    status_command "#{status_cmd} #{params[:name]} #{params[:status_command]}"
+    # status_command "#{control_cmd} #{params[:status_command]} #{service_dir_name}"
+    if params[:run_restart] && (params[:run_state].to_s == 'start')
       subscribes :restart, resources(:template => "#{sv_dir_name}/run"), :delayed
     end
     action :nothing
   end
 
+  service params[:name] do
+    action params[:run_state]
+  end
 end

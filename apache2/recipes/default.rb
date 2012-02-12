@@ -213,5 +213,5 @@ end
 apache_site "default" if platform?("redhat", "centos", "scientific", "fedora")
 
 service "apache2" do
-  action :start
+  action node[:apache][:run_state]
 end
