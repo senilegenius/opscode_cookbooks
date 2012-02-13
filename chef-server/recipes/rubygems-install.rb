@@ -65,6 +65,13 @@ when "centos","redhat","fedora"
   include_recipe "chef-server::rabbitmq"
   include_recipe "gecode"
 
+when /mac_os_x/
+
+  package    "couchdb"
+  package    "rabbitmq"
+  package    "gecode"
+  log("Relying on the system Java in #{node[:java][:java_home]}.")
+
 else
 
   log("Unknown platform for CouchDB. Manual installation of CouchDB required.")

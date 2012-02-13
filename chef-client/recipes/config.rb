@@ -30,7 +30,7 @@ chef_node_name = Chef::Config[:node_name] == node["fqdn"] ? false : Chef::Config
 %w{run_path cache_path backup_path log_dir}.each do |key|
   directory node['chef_client'][key] do
     recursive true
-    owner "root"
+    owner node['chef_client'][:user]
     group root_group
     mode 0755
   end
