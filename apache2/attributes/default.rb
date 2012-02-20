@@ -19,6 +19,8 @@
 
 set[:apache][:root_group]  = "root"
 
+default[:apache][:server][:run_state] = :enable
+
 # Where the various parts of apache are
 case platform
 when "redhat","centos","scientific","fedora","suse"

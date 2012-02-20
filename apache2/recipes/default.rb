@@ -52,7 +52,7 @@ service "apache2" do
     "freebsd" => { "default" => [ :restart, :reload, :status ] },
     "default" => { "default" => [:restart, :reload ] }
   )
-  action :enable
+  action node[:apache][:server][:run_state]
 end
 
 if platform?("redhat", "centos", "scientific", "fedora", "arch", "suse", "freebsd")
