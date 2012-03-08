@@ -38,8 +38,10 @@ action :install do
 
     if new_resource.source
       remote_file dmg_file do
-        source new_resource.source
+        source   new_resource.source
         checksum new_resource.checksum if new_resource.checksum
+        group    'admin'
+        mode     '0644'
       end
     end
 
@@ -49,7 +51,7 @@ action :install do
 
     case new_resource.type
     when "app"
-      execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'"
+      execute "cp -a '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'"
     when "mpkg"
       execute "sudo installer -pkg /Volumes/#{volumes_dir}/#{new_resource.app}.mpkg -target /"
     end
