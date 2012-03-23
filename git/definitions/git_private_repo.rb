@@ -25,7 +25,15 @@
 # wrapper script be created but the repository not cloned (useful in
 # deploy resources).  The wrapper script will be at
 # etc/deploy/#{params[:name}/#{params[:name]}.sh
-define :git_private_repo, :action => :checkout, :repository => nil, :shared_keys => nil, :path => nil, :user => nil, :group => nil, :branch => 'deploy', :enable_submodules => false do
+#
+# You can also pass the public and private key directly as params:
+#
+#   git_private_repo 'foobar' do
+#     private_key '...'
+#     public_key  '...'
+#   end
+#     
+define :git_private_repo, :action => :checkout, :repository => nil, :shared_keys => nil, :path => nil, :user => nil, :group => nil, :branch => 'deploy', :enable_submodules => false, :private_key => nil, :public_key => nil do
 
   deploy_dir       = File.join('/etc/deploy', params[:name])
   private_key_path = File.join(deploy_dir, "#{params[:name]}.pem")
@@ -39,28 +47,44 @@ define :git_private_repo, :action => :checkout, :repository => nil, :shared_keys
     recursive true
   end
 
-  cookbook_file private_key_path do
-    if params[:shared_keys]
-      cookbook 'git'
-      source "shared_deploy_key.pem"
-    else
-      source File.basename(private_key_path)
+  if params[:private_key]
+    file private_key_path do
+      content params[:private_key]
+      mode    '0600'
+      action  :create
     end
-    group 'admin'
-    mode 0600
-    action :create
+  else
+    cookbook_file private_key_path do
+      if params[:shared_keys]
+        cookbook 'git'
+        source "shared_deploy_key.pem"
+      else
+        source File.basename(private_key_path)
+      end
+      group 'admin'
+      mode 0600
+      action :create
+    end
   end
 
-  cookbook_file public_key_path do
-    if params[:shared_keys]
-      cookbook 'git'
-      source "shared_deploy_key.pub"
-    else
-      source File.basename(public_key_path)
+  if params[:public_key]
+    file public_key_path do
+      content params[:public_key]
+      mode    '0644'
+      action  :create
     end
-    group 'admin'
-    mode 0644
-    action :create
+  else
+    cookbook_file public_key_path do
+      if params[:shared_keys]
+        cookbook 'git'
+        source "shared_deploy_key.pub"
+      else
+        source File.basename(public_key_path)
+      end
+      group 'admin'
+      mode 0644
+      action :create
+    end
   end
 
   template ssh_wrapper_path do
