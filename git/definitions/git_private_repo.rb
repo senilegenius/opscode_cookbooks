@@ -33,7 +33,7 @@
 #     public_key  '...'
 #   end
 #     
-define :git_private_repo, :action => :checkout, :repository => nil, :shared_keys => nil, :path => nil, :user => nil, :group => nil, :branch => 'deploy', :enable_submodules => false, :private_key => nil, :public_key => nil do
+define :git_private_repo, :action => :checkout, :repository => nil, :shared_keys => nil, :path => nil, :user => nil, :group => nil, :branch => 'master', :enable_submodules => true, :private_key => nil, :public_key => nil do
 
   deploy_dir       = File.join('/etc/deploy', params[:name])
   private_key_path = File.join(deploy_dir, "#{params[:name]}.pem")
