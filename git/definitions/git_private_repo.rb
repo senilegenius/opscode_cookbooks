@@ -64,6 +64,11 @@ define :git_private_repo, :action => :checkout, :repository => nil, :path => nil
     directories :deploy_root
   end
   deploy_dir = File.join(node[:git][:deploy_root], params[:name])
+  directory deploy_dir do
+    mode    '0755'
+    action  :create
+  end
+  
 
   #
   # Private keys
@@ -99,16 +104,17 @@ define :git_private_repo, :action => :checkout, :repository => nil, :path => nil
   #
   # Create the SSH wrapper
   #
-
   ssh_wrapper_path = File.join(deploy_dir, "#{params[:name]}.sh")
   if params[:private_keys_contents].empty? && params[:private_keys_files].empty?
-    private_keys_paths = File.join(deploy_dir, "#{params[:name]}.pem")
+    private_key_path          = File.join(deploy_dir, "#{params[:name]}.pem")
+    private_keys_paths_string = "-i #{private_key_path}"
   else
     private_keys_paths = (params[:private_keys_contents].keys + params[:private_keys_files]).map do |name|
       File.join(deploy_dir, "#{name}.pem")
     end
+    private_keys_paths_string = private_keys_paths.map { |path| "-i #{path}" }.join(' ')
   end
-  private_keys_paths_string = private_keys_paths.map { |path| "-i #{path}" }.join(' ')
+  
   template ssh_wrapper_path do
     variables :private_keys_paths_string => private_keys_paths_string
     source    'ssh_wrapper.sh.erb'
