@@ -47,6 +47,11 @@
 #       'repo3' => '...contents of private key for repo 3...',
 #       'repo4' => '...contents of private key for repo 4...'
 #     })
+#
+#     # For git repos/submodules without a user defined,
+#     # the ssh wrapper sets a default user of 'git',
+#     # which can be changed here.
+#     default_ssh_user 'git'
 #   end
 #
 # All the keys, both those sourced from cookbook files
@@ -55,7 +60,7 @@
 # Only one SSH wrapper will be created but it will name all these
 # keys.
 #     
-define :git_private_repo, :action => :checkout, :repository => nil, :path => nil, :user => nil, :group => nil, :branch => 'master', :enable_submodules => true, :private_keys_contents => {}, :private_keys_files => [] do
+define :git_private_repo, :action => :checkout, :repository => nil, :path => nil, :user => nil, :group => nil, :branch => 'master', :enable_submodules => true, :private_keys_contents => {}, :private_keys_files => [], :default_ssh_user => 'git' do
 
   #
   # Make sure the deploy key directory exists.
@@ -116,7 +121,7 @@ define :git_private_repo, :action => :checkout, :repository => nil, :path => nil
   end
   
   template ssh_wrapper_path do
-    variables :private_keys_paths_string => private_keys_paths_string
+    variables :private_keys_paths_string => private_keys_paths_string, :default_ssh_user => params[:default_ssh_user]
     source    'ssh_wrapper.sh.erb'
     cookbook  'git'
     mode      '0744'
