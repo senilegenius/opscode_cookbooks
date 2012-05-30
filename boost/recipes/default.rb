@@ -16,4 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package "libboost-dev"
+package value_for_platform(
+  ["centos","redhat","fedora" ] => {
+    "default" => "boost-devel"
+  },
+  "default" => "libboost-dev"
+)
