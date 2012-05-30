@@ -24,7 +24,15 @@ include_recipe "boost"
 include_recipe "python"
 include_recipe "install_from"
 
-%w{ flex bison libtool autoconf pkg-config }.each do |pkg|
+packages = value_for_platform(
+  ["centos", "redhat", "suse", "fedora" ] => {
+    "default" => %w{ flex bison libtool autoconf pkgconfig }
+  },
+  "default" => {
+    "default" => %w{ flex bison libtool autoconf pkg-config }
+  }
+)
+packages.each do |pkg|
   package pkg
 end
 
