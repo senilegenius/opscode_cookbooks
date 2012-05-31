@@ -29,7 +29,7 @@ ant_pkgs = value_for_platform(
     "default" => ["ant","ant-contrib","ivy"]
   },
   ["centos","redhat","fedora" ] => {
-    "default" => ["ant","ant-contrib"]
+    "default" => ["ant","ant-contrib","ant-nodeps"]
   },
   "default" => ["ant","ant-contrib","ivy"]
 )
