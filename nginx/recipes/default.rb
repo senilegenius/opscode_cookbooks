@@ -18,7 +18,17 @@
 # limitations under the License.
 #
 
+bash "Add EPEL repository" do
+  code "rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-7.noarch.rpm"
+  not_if "yum list installed epel-release"
+  only_if { platform?('centos') }
+end
+
 package "nginx"
+
+user node[:nginx][:user]
+group node[:nginx][:group]
+
 
 directory node[:nginx][:log_dir] do
   mode 0755
@@ -41,6 +51,15 @@ template "nginx.conf" do
   owner "root"
   group "root"
   mode 0644
+end
+
+%w{sites-available sites-enabled}.each do |subdir|
+  directory "#{node[:nginx][:dir]}/#{subdir}" do
+    mode 0755
+    owner "root"
+    group "root"
+    action :create
+  end
 end
 
 template "#{node[:nginx][:dir]}/sites-available/default" do
