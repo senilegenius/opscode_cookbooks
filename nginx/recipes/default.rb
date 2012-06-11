@@ -69,6 +69,11 @@ template "#{node[:nginx][:dir]}/sites-available/default" do
   mode 0644
 end
 
+file "#{node[:nginx][:dir]}/conf.d/default.conf" do
+  action :delete
+  notifies :restart, 'service[nginx]', :immediately
+end if platform?('centos')
+
 service "nginx" do
   supports :status => true, :restart => true, :reload => true
   action [ :enable, :start ]
