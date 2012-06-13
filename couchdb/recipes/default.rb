@@ -32,6 +32,8 @@ when "redhat","centos","fedora","amazon"
     home "/var/lib/couchdb"
     system true
   end
+  
+  include_recipe 'yum::epel'
 end
 
 package "couchdb" do
