@@ -18,11 +18,7 @@
 # limitations under the License.
 #
 
-bash "Add EPEL repository" do
-  code "rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-7.noarch.rpm"
-  not_if "yum list installed epel-release"
-  only_if { platform?('centos') }
-end
+include_recipe 'yum::epel' if platform?('centos')
 
 package "nginx"
 
