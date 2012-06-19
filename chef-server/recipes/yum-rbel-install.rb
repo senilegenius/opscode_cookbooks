@@ -55,7 +55,7 @@ if platform?('centos')
   end
 
   execute "grant chef user permission to /chef vhost in rabbitmq" do
-    command "rabbitmqctl set_permissions -p /chef chef ".*" ".*" ".*""
+    command "rabbitmqctl set_permissions -p /chef chef '.*' '.*' '.*'"
     not_if "rabbitmqctl list_user_permissions chef | grep '/chef'"
   end
 end
