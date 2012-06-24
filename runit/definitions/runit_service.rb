@@ -164,11 +164,18 @@ define :runit_service, :directory => nil, :only_if => false, :finish_script => f
     action :nothing
   end
 
+  # FIXME: this will start a process immediately. instead do the thing in the following block.
   service params[:name] do
     action params[:run_state]
   end
 
-  # # FIXME: the above will start a process immediately. instead, something like this:
-  # notifies params[:run_state], "service[#{params[:name]}]", :delayed
+  # # FIXME: something like this is how we should start a service
+  # service params[:name] do
+  # end
+  # ruby_block "#{params[:run_state]} the #{params[:name]} service" do
+  #   notifies params[:run_state], "service[#{params[:name]}]", :delayed
+  #   action :create
+  #   block{}
+  # end
 
 end
