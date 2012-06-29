@@ -23,8 +23,8 @@
   CustomLog <%= @params[:log_dir] %>/<%= @params[:name] %>-access.log combined
 
   SSLEngine On
-  SSLCertificateFile /etc/chef/certificates/chef-server-proxy.pem
-  SSLCertificateKeyFile /etc/chef/certificates/chef-server-proxy.pem
+  SSLCertificateFile <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem
+  SSLCertificateKeyFile <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem
 
   RequestHeader set X_FORWARDED_PROTO 'https'
 
@@ -59,8 +59,8 @@
   CustomLog <%= @params[:log_dir] %>/<%= @params[:name] %>-access.log combined
 
   SSLEngine On
-  SSLCertificateFile /etc/chef/certificates/chef-server-proxy.pem
-  SSLCertificateKeyFile /etc/chef/certificates/chef-server-proxy.pem
+  SSLCertificateFile <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem
+  SSLCertificateKeyFile <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem
 
   RequestHeader set X_FORWARDED_PROTO 'https'
 

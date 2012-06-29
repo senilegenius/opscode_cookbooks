@@ -21,16 +21,10 @@
 # limitations under the License.
 #
 
-root_group = value_for_platform(
-  "openbsd"  => { "default" => "wheel" },
-  "freebsd"  => { "default" => "wheel" },
-  "mac_os_x" => { "default" => "wheel" },
-  "default"  => "root"
-)
-
-user "chef" do
+user node['chef_server']['user'] do
+  action node['chef_server']['manage_user_action']
   system true
-  shell "/bin/sh"
+  shell node['chef_server']['user_shell']
   home node['chef_server']['path']
 end
 
@@ -105,63 +99,68 @@ chef_dirs = [
   node['chef_server']['cache_path'],
   node['chef_server']['backup_path'],
   node['chef_server']['run_path'],
-  "/etc/chef"
+  node['chef_server']['conf_dir'],
 ]
+
+Chef::Log.info chef_dirs.inspect
 
 chef_dirs.each do |dir|
   directory dir do
-    owner "chef"
-    group root_group
+    owner node['chef_server']['user']
+    group node['chef_server']['group']
     mode 0755
   end
 end
 
 %w{ server solr }.each do |cfg|
-  template "/etc/chef/#{cfg}.rb" do
+  template "#{node['chef_server']['conf_dir']}/#{cfg}.rb" do
     source "#{cfg}.rb.erb"
-    owner "chef"
-    group root_group
+    owner node['chef_server']['user']
+    group node['chef_server']['group']
     mode 0600
   end
 
-  link "/etc/chef/webui.rb" do
-    to "/etc/chef/server.rb"
+  link "#{node['chef_server']['conf_dir']}/webui.rb" do
+    to "#{node['chef_server']['conf_dir']}/server.rb"
   end
 
-  link "/etc/chef/expander.rb" do
-    to "/etc/chef/solr.rb"
+  link "#{node['chef_server']['conf_dir']}/expander.rb" do
+    to "#{node['chef_server']['conf_dir']}/solr.rb"
   end
 end
 
 directory node['chef_server']['path'] do
-  owner "chef"
-  group root_group
+  owner node['chef_server']['user']
+  group node['chef_server']['group']
+  #group root_group
   mode 0755
 end
 
 %w{ cache search_index }.each do |dir|
   directory "#{node['chef_server']['path']}/#{dir}" do
-    owner "chef"
-    group root_group
+    owner node['chef_server']['user']
+    group node['chef_server']['group']
+    # group root_group
     mode 0755
   end
 end
 
-directory "/etc/chef/certificates" do
-  owner "chef"
-  group root_group
+directory "#{node['chef_server']['conf_dir']}/certificates" do
+  owner node['chef_server']['user']
+  group node['chef_server']['group']
+  #group root_group
   mode 0700
 end
 
 directory node['chef_server']['run_path'] do
-  owner "chef"
-  group root_group
+  owner node['chef_server']['user']
+  group node['chef_server']['group']
   mode 0755
 end
 
 # install solr
 execute "chef-solr-installer" do
-  command  "chef-solr-installer -c /etc/chef/solr.rb -u chef -g #{root_group}"
+  command  "chef-solr-installer -c #{node['chef_server']['conf_dir']}/solr.rb -u #{node['chef_server']['user']} -g #{node['chef_server']['group']}"
   path %w{ /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin }
   not_if { ::File.exists?("#{node['chef_server']['path']}/solr/home") }
 end
@@ -189,8 +188,8 @@ when "init"
 
   directory node['chef_server']['run_path'] do
     action :create
-    owner "chef"
-    group root_group
+    owner node['chef_server']['user']
+    group node['chef_server']['group']
     mode 0755
   end
 
@@ -266,7 +265,9 @@ when "procfile"
 
   gem_package "foreman"
 
-  procfiles = [ "/etc/chef/Procfile-chef-backend", "/etc/chef/Procfile-chef-server" ]
+  procfiles = [ "#{node['chef_server']['conf_dir']}/Procfile-chef-backend",
+                "#{node['chef_server']['conf_dir']}/Procfile-chef-server",
+                "#{node['chef_server']['conf_dir']}/setup-chef-server.sh" ]
   procfiles.each do |procfile_path|
     template procfile_path do
       source      "#{File.basename(procfile_path)}.erb"
@@ -276,7 +277,8 @@ when "procfile"
   end
 
   msg = "\nLaunch chef server with\n\n"
-  msg << procfiles.map{|pf| "sudo -u chef foreman start -f #{pf}" }.join(" & sleep 2\n")
+  msg << procfiles.map{|pf| "sudo -u #{node['chef_server']['user']} foreman start -f #{pf}" }.join(" & sleep 2\n")
+  msg << "\n(sudo unnecessary if you are #{node['chef_server']['user']})"
   msg << "\n"
   log(msg)
 

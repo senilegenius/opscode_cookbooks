@@ -39,17 +39,21 @@ if (platform?("ubuntu") && node.platform_version.to_f <= 9.10) || debian_before_
     version '1.7.2-1'
     action :install
   end
+elsif platform?("mac_os_x")
+  package "rabbitmq"
 else
   package "rabbitmq-server"
 end
 
-service "rabbitmq-server" do
-  if platform?("centos","redhat","fedora")
-    start_command "/sbin/service rabbitmq-server start &> /dev/null"
-    stop_command "/sbin/service rabbitmq-server stop &> /dev/null"
+if not platform?("mac_os_x")
+  service "rabbitmq-server" do
+    if platform?("centos","redhat","fedora")
+      start_command "/sbin/service rabbitmq-server start &> /dev/null"
+      stop_command "/sbin/service rabbitmq-server stop &> /dev/null"
+    end
+    supports [ :restart, :status ]
+    action [ :enable, :start ]
   end
-  supports [ :restart, :status ]
-  action [ :enable, :start ]
 end
 
 # add a chef vhost to the queue

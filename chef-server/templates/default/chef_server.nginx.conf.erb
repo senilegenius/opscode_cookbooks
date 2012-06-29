@@ -8,8 +8,8 @@ upstream chef_server_webui {
 
 server {
   listen <%= @api_port %> ssl;
-  ssl_certificate /etc/chef/certificates/chef-server-proxy.pem;
-  ssl_certificate_key /etc/chef/certificates/chef-server-proxy.pem;
+  ssl_certificate <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem;
+  ssl_certificate_key <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem;
   server_name <%= @api_server_name %>;
   access_log <%= node[:nginx][:log_dir] %>/chef-server.access.log;
   error_log <%= node[:nginx][:log_dir] %>/chef-server.error.log warn;
@@ -41,8 +41,8 @@ server {
 <% if node['chef_server']['webui_enabled'] -%>
 server {
   listen <%= @webui_port %> ssl;
-  ssl_certificate /etc/chef/certificates/chef-server-proxy.pem;
-  ssl_certificate_key /etc/chef/certificates/chef-server-proxy.pem;
+  ssl_certificate <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem;
+  ssl_certificate_key <%= node['chef_server']['conf_dir'] %>/certificates/chef-server-proxy.pem;
   server_name <%= @webui_server_name %>;
   access_log <%= node[:nginx][:log_dir] %>/chef-server.access.log;
   error_log <%= node[:nginx][:log_dir] %>/chef-server.error.log warn;
