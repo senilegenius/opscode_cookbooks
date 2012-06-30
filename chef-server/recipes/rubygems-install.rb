@@ -277,10 +277,9 @@ when "procfile"
   end
 
   msg = "\nLaunch chef server with\n\n"
-  msg << procfiles.map{|pf| "sudo -u #{node['chef_server']['user']} foreman start -f #{pf}" }.join(" & sleep 2\n")
-  msg << "\n(sudo unnecessary if you are #{node['chef_server']['user']})"
+  msg << procfiles.map{|pf| "foreman start -f #{pf}" }.join(" & sleep 2\n")
   msg << "\n"
-  log(msg)
+  Chef::Log.info(msg)
 
 when "bsd"
 

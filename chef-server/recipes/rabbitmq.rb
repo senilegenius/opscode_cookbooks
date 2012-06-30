@@ -45,15 +45,13 @@ else
   package "rabbitmq-server"
 end
 
-if not platform?("mac_os_x")
-  service "rabbitmq-server" do
-    if platform?("centos","redhat","fedora")
-      start_command "/sbin/service rabbitmq-server start &> /dev/null"
-      stop_command "/sbin/service rabbitmq-server stop &> /dev/null"
-    end
-    supports [ :restart, :status ]
-    action [ :enable, :start ]
+service "rabbitmq-server" do
+  if platform?("centos","redhat","fedora")
+    start_command "/sbin/service rabbitmq-server start &> /dev/null"
+    stop_command "/sbin/service rabbitmq-server stop &> /dev/null"
   end
+  supports [ :restart, :status ]
+  action [ :enable, :start ]
 end
 
 # add a chef vhost to the queue
