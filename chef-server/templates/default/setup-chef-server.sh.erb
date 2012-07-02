@@ -35,6 +35,7 @@ if rabbitmqctl list_user_permissions "$rabbitmq_user" | grep -q "$rabbitmq_vhost
 else
   echo "Setting rabbitmq user ${rabbimq_user} permissions..."
   rabbitmqctl set_permissions -p "$rabbitmq_vhost" "$rabbitmq_user" ".*" ".*" ".*"
+  rabbitmqctl set_permissions -p "$rabbitmq_vhost" "guest"          ".*" ".*" ".*"
 fi
 
 # start chef_server to generate the keys
@@ -42,7 +43,7 @@ echo "Starting up chef server to generate keys..."
 foreman start chef_server -f ${chef_conf_dir}/Procfile-chef-server &
 
 for tm in 3 10 15 20 ; do
-  if [ -f ${chef_conf_dir}/webui.pem ] ; then break ; else fi
+  if [ -f ${chef_conf_dir}/webui.pem ] ; then break ; fi
   echo "  waiting $tm seconds for chef server to make keys..."
   sleep $tm
 done

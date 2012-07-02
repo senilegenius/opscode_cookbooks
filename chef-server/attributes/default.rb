@@ -57,6 +57,7 @@ when "mac_os_x"
   default["chef_server"]["conf_dir"]    = "/usr/local/etc/chef"
   default["chef_server"]["log_dir"]     = "/usr/local/var/log/chef"
   default['chef_server']['group']       = 'wheel'
+  default['chef_server']['solr_config'] = 'usr/local/var/chef/solr/home/conf/solrconfig.xml'
 else
   default["chef_server"]["init_style"]  = "none"
   default["chef_server"]["path"]        = "/var/chef"

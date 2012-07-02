@@ -165,6 +165,13 @@ execute "chef-solr-installer" do
   not_if { ::File.exists?("#{node['chef_server']['path']}/solr/home") }
 end
 
+if node['chef_server']['solr_config']
+  bash "fix dangerous maxFieldLength in solr config" do
+    code        %Q{perl -i -pe 's|<maxFieldLength>10000</maxFieldLength>|<maxFieldLength>50500</maxFieldLength>|g' '#{node['chef_server']['solr_config']}'}
+    only_if     "egrep -q '<maxFieldLength>10000</maxFieldLength>' '#{node['chef_server']['solr_config']}'"
+  end
+end
+
 case node['chef_server']['init_style']
 when "runit"
 
