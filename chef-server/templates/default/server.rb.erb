@@ -13,6 +13,7 @@ sandbox_path            "<%= node['chef_server']['cache_path'] %>/sandboxes"
 checksum_path           "<%= node['chef_server']['path'] %>/cookbook_index"
 node_path               "<%= node['chef_server']['path'] %>/node"
 cookbook_tarball_path   "<%= node['chef_server']['path']%>/cookbook-tarballs"
+cache_options           ({ :path => "<%= node['chef_server']['cache_path'] %>/checksums", :skip_expires =>true})
 
 validation_client_name  "<%= node['chef_server']['validation_client_name'] %>"
 validation_key          "<%= node['chef_server']['conf_dir'] %>/validation.pem"
