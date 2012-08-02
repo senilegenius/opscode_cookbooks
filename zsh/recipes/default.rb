@@ -26,7 +26,7 @@ when "ubuntu","debian"
   package "zsh-doc" do
     action :install
   end
-when "centos"
+when "centos","redhat"
   package "zsh-html" do
     action :install
   end

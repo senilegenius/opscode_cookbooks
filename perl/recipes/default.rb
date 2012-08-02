@@ -23,7 +23,7 @@ end
 
 package "libwww-perl" do
   case node[:platform]
-  when "centos"
+  when "centos","redhat"
     package_name "perl-libwww-perl"
   when "arch"
     package_name "perl-libwww"
@@ -33,7 +33,7 @@ end
 
 package "libperl-dev" do
   case node[:platform]
-  when "centos","arch"
+  when "centos","arch","redhat"
     action :nothing
   else
     action :upgrade
